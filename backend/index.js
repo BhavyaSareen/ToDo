@@ -59,6 +59,39 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+// Login API route
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Both email and password are required.' });
+  }
+
+  try {
+    // Find user by email
+    const userSnapshot = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+
+    if (!userSnapshot.exists()) {
+      return res.status(401).json({ message: 'Invalid email or password.' });
+    }
+
+    const user = userSnapshot.val();
+    const userKey = Object.keys(user)[0]; // Get the user's unique key
+    const storedUser = user[userKey];
+
+    // Compare the provided password with the stored hashed password
+    const isPasswordValid = await bcrypt.compare(password, storedUser.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid email or password.' });
+    }
+
+    res.status(200).json({ message: 'Login successful', userId: userKey });
+  } catch (error) {
+    res.status(500).json({ message: 'Error logging in user', error: error.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
