@@ -3,7 +3,6 @@ backend/firebasedata.json
 node_modules/
 backend/package-lock.json/
 backend/firebasedata.json/
-*.json
 backend/firebasedata.json
 backend/firebasedata.json
 .env
