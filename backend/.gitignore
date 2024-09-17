@@ -7,3 +7,4 @@ backend/firebasedata.json
 backend/firebasedata.json
 .env
 backend/package-lock.json
+.vercel

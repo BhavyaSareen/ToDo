@@ -2,11 +2,13 @@ const admin = require('firebase-admin');
 const express = require('express');
 const bcrypt = require('bcryptjs'); // For hashing passwords
 const dotenv = require('dotenv'); // For loading environment variables
+const cors = require('cors'); // Import cors middleware
 
 dotenv.config(); // Load environment variables from .env file
 
 const app = express();
 app.use(express.json());
+app.use(cors()); 
 
 // Initialize Firebase Admin SDK with Service Account Key from environment variables
 const serviceAccount = {
@@ -69,11 +71,25 @@ app.post('/signup', async (req, res) => {
     const ref = db.ref('users').push(); // Create a unique key under 'users'
     await ref.set(newUser);
 
-    res.status(200).json({ message: 'User signed up successfully', userId: ref.key });
+    // Custom claims to include in the token
+    const customClaims = {
+      name: newUser.name,
+      email: newUser.email,
+    };
+
+    // Generate a custom authentication token with custom claims
+    const customToken = await admin.auth().createCustomToken(ref.key, customClaims);
+
+    res.status(200).json({
+      message: 'User signed up successfully',
+      userId: ref.key,
+      token: customToken // Include the custom token in the response
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error signing up user', error: error.message });
   }
 });
+
 
 // Login API route
 app.post('/login', async (req, res) => {
@@ -120,6 +136,7 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Error logging in user', error: error.message });
   }
 });
+
 
 
 // Task routes (GET, POST, DELETE, PATCH) with authentication
