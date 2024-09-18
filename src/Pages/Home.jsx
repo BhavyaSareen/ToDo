@@ -3,6 +3,7 @@ import { Col, Container, Row } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
 
 function Home() {
+    
     return (
         <div className='container-fluid '>
             <div className='row vh-100'>

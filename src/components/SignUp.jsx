@@ -2,17 +2,49 @@
 
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { Base_URL } from '../assets/Utilis';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const SignUp = () => {
+  const[name, setName] = useState("");
     const[email, setEmail] = useState("");
     const[password, setPassword] = useState("");
     const[error, setError] = useState("");
     const[success, setSuccess] = useState(false);
+    const navigate = useNavigate();
+
 
     const handleSignUp = async(e)=>{
         e.preventDefault();
-        console.log(email)
-        console.log(password)
+        // console.log(name)
+        // console.log(email)
+        // console.log(password)
+        try {
+          const res = await axios.post(`${Base_URL}/signup`,{
+            name, email, password,
+          });
+          if(res.status === 200){
+            // console.log("Successful");
+            const token = res.data.token;
+            // console.log(token);
+            const decodedToken = jwtDecode(token);
+            // console.log(decodedToken);
+            localStorage.setItem("user",JSON.stringify(decodedToken.claims));
+            localStorage.setItem("token",JSON.stringify(token));
+            toast.success("Login Successfully")
+            navigate('/dashboard')
+          }
+        } catch (error) {
+          if (error.response) {
+            toast.error(error.response.data.message || "Request failed");
+          }
+          else{
+            toast.error("Error")
+          }
+        }
     }
   return (
     <Container className="mt-5">
@@ -21,12 +53,13 @@ const SignUp = () => {
           <h2 className="text-center mb-4">Sign Up</h2>
           <Form onSubmit={handleSignUp}>
             <Form.Group controlId="formName" className="mb-3">
-              <Form.Label>Email Name</Form.Label>
+              <Form.Label>Name</Form.Label>
               <Form.Control
                 type="text"
                 name="name"
                 placeholder="Enter your name"
-                required
+                value={name}
+                onChange={(e)=>setName(e.target.value)}
               />
             </Form.Group>
 
@@ -38,7 +71,6 @@ const SignUp = () => {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e)=> setEmail(e.target.value)}
-                required
               />
             </Form.Group>
 
@@ -50,7 +82,6 @@ const SignUp = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e)=>setPassword(e.target.value)}
-                required
               />
             </Form.Group>
 
