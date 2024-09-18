@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Import axios
 import { BaseUrl, useUser } from '../../assets/UserContext';
 import { Link } from 'react-router-dom';
-import { jwtDecode } from "jwt-decode"; // Ensure jwtDecode is imported correctly
+import { jwtDecode } from "jwt-decode"; // Import jwt-decode correctly
 
 const Login = ({ showToast }) => {
   const [email, setEmail] = useState('');
@@ -14,34 +15,31 @@ const Login = ({ showToast }) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${BaseUrl}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const res = await axios.post(`${BaseUrl}/login`, {
+        email,
+        password,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        // Decode the JWT token
-        const decodedToken = jwtDecode(data.token);
+      if (res.status === 200) {
+        const { token } = res.data;
 
-        // Extract the claims (user information)
+        const decodedToken = jwtDecode(token);
+
         const { claims } = decodedToken;
-        console.log(claims)
+        console.log(claims);
 
-        // Store only the claims in local storage
         localStorage.setItem('user', JSON.stringify(claims));
 
-        // Log the user in using your login context
-        login(data);
+        login(res.data);
         showToast('success', 'Login successful!');
         navigate('/');
-      } else {
-        const errorData = await res.json();
-        showToast('error', errorData.message || 'Login failed.');
       }
     } catch (error) {
-      showToast('error', 'An unexpected error occurred.');
+      if (error.response) {
+        showToast('error', error.response.data.message || 'Login failed.');
+      } else {
+        showToast('error', 'An unexpected error occurred.');
+      }
     }
   };
 

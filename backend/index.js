@@ -1,14 +1,16 @@
 const admin = require('firebase-admin');
 const express = require('express');
-const bcrypt = require('bcryptjs'); // For hashing passwords
-const dotenv = require('dotenv'); // For loading environment variables
-const cors = require('cors'); // Import cors middleware
-
-dotenv.config(); // Load environment variables from .env file
+const bcrypt = require('bcryptjs');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const multer = require('multer');
+const { getStorage } = require('firebase-admin/storage');
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors()); 
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Initialize Firebase Admin SDK with Service Account Key from environment variables
 const serviceAccount = {
@@ -49,7 +51,7 @@ const authenticate = async (req, res, next) => {
 };
 
 // Signup API route
-app.post('/signup', async (req, res) => {
+app.post('/signup', upload.single('profilePhoto'), async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -60,6 +62,7 @@ app.post('/signup', async (req, res) => {
     // Hash the password before storing it
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Define a new user object
     const newUser = {
       name,
       email,
@@ -69,12 +72,31 @@ app.post('/signup', async (req, res) => {
 
     // Save user data in Firebase Realtime Database
     const ref = db.ref('users').push(); // Create a unique key under 'users'
+
+    // Upload the profile photo to Firebase Storage (if a file is provided)
+    let profilePhotoUrl = null;
+    if (req.file) {
+      const bucket = getStorage().bucket();
+      const fileName = `profile_photos/${ref.key}-${Date.now()}-${req.file.originalname}`;
+      const file = bucket.file(fileName);
+
+      await file.save(req.file.buffer, {
+        metadata: { contentType: req.file.mimetype },
+      });
+
+      // Get the file's public URL
+      profilePhotoUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+      newUser.profilePhotoUrl = profilePhotoUrl; // Add profile photo URL to the user object
+    }
+
+    // Save user info with profile photo URL in Firebase Realtime Database
     await ref.set(newUser);
 
     // Custom claims to include in the token
     const customClaims = {
       name: newUser.name,
       email: newUser.email,
+      profilePhotoUrl: profilePhotoUrl || '', // Include the profile photo URL in the token claims if present
     };
 
     // Generate a custom authentication token with custom claims
@@ -83,7 +105,8 @@ app.post('/signup', async (req, res) => {
     res.status(200).json({
       message: 'User signed up successfully',
       userId: ref.key,
-      token: customToken // Include the custom token in the response
+      token: customToken, // Include the custom token in the response
+      profilePhotoUrl, // Return the profile photo URL in the response
     });
   } catch (error) {
     res.status(500).json({ message: 'Error signing up user', error: error.message });
@@ -122,6 +145,7 @@ app.post('/login', async (req, res) => {
     const customClaims = {
       name: storedUser.name,
       email: storedUser.email,
+      profilePhotoUrl: storedUser.profilePhotoUrl || '', // Include the profile photo URL in the token claims
     };
 
     // Generate a custom authentication token with custom claims
@@ -130,12 +154,14 @@ app.post('/login', async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       userId: userKey,
-      token: customToken // Include the custom token in the response
+      token: customToken, // Include the custom token in the response
+      profilePhotoUrl: storedUser.profilePhotoUrl, // Return the profile photo URL in the response
     });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in user', error: error.message });
   }
 });
+
 
 
 
@@ -156,7 +182,7 @@ app.get('/tasks', authenticate, async (req, res) => {
 
 // Create a new task for authenticated user
 app.post('/tasks', authenticate, async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, dueDate } = req.body;
 
   if (!title || !description) {
     return res.status(400).json({ message: 'Title and description are required.' });
@@ -166,6 +192,7 @@ app.post('/tasks', authenticate, async (req, res) => {
     title,
     description,
     createdAt: Date.now(),
+    dueDate: dueDate ? new Date(dueDate).toISOString() : null, // Convert dueDate to ISO format
     completed: false,
   };
 
@@ -180,10 +207,15 @@ app.post('/tasks', authenticate, async (req, res) => {
 });
 
 
+
 // Update a task for authenticated user
 app.patch('/tasks/:taskId', authenticate, async (req, res) => {
   const { taskId } = req.params;
   const updates = req.body;
+
+  if (updates.dueDate) {
+    updates.dueDate = new Date(updates.dueDate).toISOString(); // Convert dueDate to ISO format
+  }
 
   try {
     await db.ref(`tasks/${req.user.uid}/${taskId}`).update(updates);
@@ -192,6 +224,7 @@ app.patch('/tasks/:taskId', authenticate, async (req, res) => {
     res.status(500).json({ message: 'Error updating task', error: error.message });
   }
 });
+
 
 // Delete a task for authenticated user
 app.delete('/tasks/:taskId', authenticate, async (req, res) => {
