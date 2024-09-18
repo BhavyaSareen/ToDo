@@ -1,16 +1,16 @@
 const admin = require('firebase-admin');
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const dotenv = require('dotenv');
 const cors = require('cors');
-const multer = require('multer');
-const { getStorage } = require('firebase-admin/storage');
+const dotenv = require('dotenv');
+const bcrypt = require('bcryptjs');
 dotenv.config();
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
+
 
 const app = express();
 app.use(express.json());
-app.use(cors()); 
-const upload = multer({ storage: multer.memoryStorage() });
+app.use(cors());
 
 // Initialize Firebase Admin SDK with Service Account Key from environment variables
 const serviceAccount = {
@@ -34,7 +34,6 @@ admin.initializeApp({
 // Get a reference to the Realtime Database
 const db = admin.database();
 
-// Middleware to authenticate user using Firebase ID token
 const authenticate = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]; // Expecting 'Bearer <token>'
   if (!token) {
@@ -42,16 +41,18 @@ const authenticate = async (req, res, next) => {
   }
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    req.user = decodedToken;
+    // Verify the JWT token
+    const decodedToken = jwt.verify(token, SECRET_KEY);
+    req.user = decodedToken; // Attach the decoded token to the request object
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Unauthorized: Invalid or expired token' });
   }
 };
 
+
 // Signup API route
-app.post('/signup', upload.single('profilePhoto'), async (req, res) => {
+app.post('/signup', async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -72,47 +73,20 @@ app.post('/signup', upload.single('profilePhoto'), async (req, res) => {
 
     // Save user data in Firebase Realtime Database
     const ref = db.ref('users').push(); // Create a unique key under 'users'
-
-    // Upload the profile photo to Firebase Storage (if a file is provided)
-    let profilePhotoUrl = null;
-    if (req.file) {
-      const bucket = getStorage().bucket();
-      const fileName = `profile_photos/${ref.key}-${Date.now()}-${req.file.originalname}`;
-      const file = bucket.file(fileName);
-
-      await file.save(req.file.buffer, {
-        metadata: { contentType: req.file.mimetype },
-      });
-
-      // Get the file's public URL
-      profilePhotoUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-      newUser.profilePhotoUrl = profilePhotoUrl; // Add profile photo URL to the user object
-    }
-
-    // Save user info with profile photo URL in Firebase Realtime Database
     await ref.set(newUser);
 
-    // Custom claims to include in the token
-    const customClaims = {
-      name: newUser.name,
-      email: newUser.email,
-      profilePhotoUrl: profilePhotoUrl || '', // Include the profile photo URL in the token claims if present
-    };
-
-    // Generate a custom authentication token with custom claims
-    const customToken = await admin.auth().createCustomToken(ref.key, customClaims);
+    // Generate a JWT token
+    const token = jwt.sign({ uid: ref.key, email }, SECRET_KEY, { expiresIn: '1h' });
 
     res.status(200).json({
       message: 'User signed up successfully',
       userId: ref.key,
-      token: customToken, // Include the custom token in the response
-      profilePhotoUrl, // Return the profile photo URL in the response
+      token, // Include the JWT token in the response
     });
   } catch (error) {
     res.status(500).json({ message: 'Error signing up user', error: error.message });
   }
 });
-
 
 // Login API route
 app.post('/login', async (req, res) => {
@@ -141,31 +115,18 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    // Custom claims to include in the token
-    const customClaims = {
-      name: storedUser.name,
-      email: storedUser.email,
-      profilePhotoUrl: storedUser.profilePhotoUrl || '', // Include the profile photo URL in the token claims
-    };
-
-    // Generate a custom authentication token with custom claims
-    const customToken = await admin.auth().createCustomToken(userKey, customClaims);
+    // Generate a JWT token
+    const token = jwt.sign({ uid: userKey, email }, SECRET_KEY, { expiresIn: '1h' });
 
     res.status(200).json({
       message: 'Login successful',
       userId: userKey,
-      token: customToken, // Include the custom token in the response
-      profilePhotoUrl: storedUser.profilePhotoUrl, // Return the profile photo URL in the response
+      token, // Include the JWT token in the response
     });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in user', error: error.message });
   }
 });
-
-
-
-
-// Task routes (GET, POST, DELETE, PATCH) with authentication
 
 // Get tasks for authenticated user
 app.get('/tasks', authenticate, async (req, res) => {
@@ -178,7 +139,6 @@ app.get('/tasks', authenticate, async (req, res) => {
     res.status(500).json({ message: 'Error fetching tasks', error: error.message });
   }
 });
-
 
 // Create a new task for authenticated user
 app.post('/tasks', authenticate, async (req, res) => {
@@ -206,8 +166,6 @@ app.post('/tasks', authenticate, async (req, res) => {
   }
 });
 
-
-
 // Update a task for authenticated user
 app.patch('/tasks/:taskId', authenticate, async (req, res) => {
   const { taskId } = req.params;
@@ -225,7 +183,6 @@ app.patch('/tasks/:taskId', authenticate, async (req, res) => {
   }
 });
 
-
 // Delete a task for authenticated user
 app.delete('/tasks/:taskId', authenticate, async (req, res) => {
   const { taskId } = req.params;
@@ -236,6 +193,11 @@ app.delete('/tasks/:taskId', authenticate, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error deleting task', error: error.message });
   }
+});
+
+// Example protected route
+app.get('/protected', authenticate, (req, res) => {
+  res.status(200).json({ message: 'Access granted', user: req.user });
 });
 
 // Start the server
