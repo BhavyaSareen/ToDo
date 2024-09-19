@@ -1,20 +1,32 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
+import { Base_URL } from '../assets/Utilis';
+import { toast } from 'react-toastify';
 
 const CreateTask = () => {
-  const [taskName, setTaskName] = useState('');
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    // Handle form submission, e.g., send the data to the backend
-    const newTask = { taskName, description, date };
-    console.log(newTask);
-    // Clear form fields after submission
-    setTaskName('');
-    setDescription('');
-    setDate('');
+    const token = localStorage.getItem("token");
+    try {
+    const res = await axios.post(`${Base_URL}/tasks`, {
+      title, description, date
+    }, { headers: { Authorization: `Bearer ${token}` } })
+    if(res.status === 200){
+      console.log("success");
+    }
+    } catch (error) {
+      if(error.response){
+        toast.error(error.response.data.message || "Request failed");
+      }
+      else{
+        toast.error("error");
+      }
+    }
   };
 
   return (
@@ -30,8 +42,8 @@ const CreateTask = () => {
               <Form.Control
                 type="text"
                 placeholder="Enter task name"
-                value={taskName}
-                onChange={(e) => setTaskName(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </Form.Group>

@@ -7,7 +7,9 @@ function Home() {
     return (
         <div className='container-fluid '>
             <div className='row vh-100'>
-                <div className='bg-secondary col-6'>Left</div>
+                <div className='col-6'>
+                    <img src="/todo-img.png" alt="todo-img" className='img-fluid' />
+                </div>
                 <div className='col-6'><Outlet/></div>
             </div>
         </div>
