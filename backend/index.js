@@ -126,7 +126,7 @@ app.post('/signup', upload.single('profileImage'), async (req, res) => {
 
     await ref.set(newUser);
 
-    const token = jwt.sign({ uid: ref.key, email }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ uid: ref.key, email }, SECRET_KEY, { expiresIn: '1d' });
     res.status(200).json({
       message: 'User signed up successfully',
       userId: ref.key,
@@ -184,16 +184,37 @@ app.post('/login', async (req, res) => {
 
 
 // Get tasks for authenticated user
+// Get tasks for authenticated user with pagination and latest-first sorting
 app.get('/tasks', authenticate, async (req, res) => {
   try {
+    // Pagination logic
+    const { page = 1 } = req.query; // Get 'page' query param, default is 1
+    const tasksPerPage = 10; // Number of tasks to display per page
+    const startIndex = (page - 1) * tasksPerPage;
+
+    // Fetch tasks for the authenticated user
     const tasksSnapshot = await db.ref(`tasks/${req.user.uid}`).once('value');
     const tasks = tasksSnapshot.val() || {};
 
-    res.status(200).json({ tasks });
+    // Convert tasks object to an array and sort by `createdAt` (latest first)
+    const sortedTasks = Object.keys(tasks)
+      .map(key => ({ id: key, ...tasks[key] }))
+      .sort((a, b) => b.createdAt - a.createdAt); // Sort by 'createdAt' descending
+
+    // Paginate tasks
+    const paginatedTasks = sortedTasks.slice(startIndex, startIndex + tasksPerPage);
+
+    res.status(200).json({
+      tasks: paginatedTasks,
+      totalTasks: sortedTasks.length, // Total number of tasks for pagination logic
+      currentPage: page, // Current page
+      totalPages: Math.ceil(sortedTasks.length / tasksPerPage) // Total pages available
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching tasks', error: error.message });
   }
 });
+
 
 // Create a new task for authenticated user
 app.post('/tasks', authenticate, async (req, res) => {
@@ -224,7 +245,7 @@ app.post('/tasks', authenticate, async (req, res) => {
       title,
       description,
       createdAt: Date.now(),
-      dueDate: dueDate ? new Date(dueDate).toISOString() : null, // Convert dueDate to ISO format
+      dueDate, // Convert dueDate to ISO format
       completed: false,
     };
 
