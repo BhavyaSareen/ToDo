@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { BaseUrl } from '../assets/UserContext';
 
 const SingleTask = () => {
   const { taskId } = useParams();
@@ -7,7 +8,7 @@ const SingleTask = () => {
 
   useEffect(() => {
     const fetchTask = async () => {
-      const res = await fetch(`/tasks/${taskId}`, {
+      const res = await fetch(`${BaseUrl}/tasks/${taskId}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,

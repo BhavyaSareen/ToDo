@@ -117,7 +117,7 @@ app.post('/signup', upload.single('profileImage'), async (req, res) => {
 
     // Save user data in Firebase Realtime Database
     const ref = db.ref('users').push();
-    
+
     // Upload profile image if provided
     if (req.file) {
       const imageUrl = await uploadImageToFirebase(req.file, ref.key);
@@ -167,14 +167,14 @@ app.post('/login', async (req, res) => {
     }
 
     // Generate a JWT token
-    const token = jwt.sign({ uid: userKey, email }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ uid: userKey, email }, SECRET_KEY);
 
     // Return login response with image URL
     res.status(200).json({
       message: 'Login successful',
       userId: userKey,
       token, // Include the JWT token in the response
-      profileImageUrl: storedUser.profileImageUrl || null // Return the profile image URL
+      profileImageUrl: storedUser.profileImageUrl || null
     });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in user', error: error.message });
@@ -215,6 +215,27 @@ app.get('/tasks', authenticate, async (req, res) => {
   }
 });
 
+// Get a specific task by ID for authenticated user
+app.get('/tasks/:taskId', authenticate, async (req, res) => {
+  const { taskId } = req.params;
+
+  try {
+    // Fetch the specific task for the authenticated user
+    const tasksSnapshot = await db.ref(`tasks/${req.user.uid}`).once('value');
+
+    const taskSnapshot = await db.ref(`tasks/${req.user.uid}/${taskId}`).once('value');
+
+    if (!taskSnapshot.exists()) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    const task = taskSnapshot.val();
+    res.status(200).json({ id: taskId, ...task });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching task', error: error.message });
+  }
+});
+
 
 // Create a new task for authenticated user
 app.post('/tasks', authenticate, async (req, res) => {
@@ -224,12 +245,16 @@ app.post('/tasks', authenticate, async (req, res) => {
     return res.status(400).json({ message: 'Title and description are required.' });
   }
 
+  // Function to generate a unique task ID
   const generateUniqueTaskId = async (baseTitle) => {
     let taskId = baseTitle.replace(/\s+/g, '-'); // Replace spaces with hyphens
-    const snapshot = await db.ref(`tasks/${req.user.uid}`).child(taskId).once('value');
+    const snapshot = await db.ref(`tasks/${req.user.uid}`).once('value');
+
+    const existingTasks = snapshot.val() || [];
+    const taskExists = existingTasks.some(task => task.id === taskId);
 
     // If task with the same ID exists, append a random 4-character string to ensure uniqueness
-    if (snapshot.exists()) {
+    if (taskExists) {
       const randomSuffix = Math.random().toString(36).substring(2, 6); // Generates a random 4-character string
       taskId = `${taskId}-${randomSuffix}`;
     }
@@ -237,26 +262,35 @@ app.post('/tasks', authenticate, async (req, res) => {
     return taskId;
   };
 
-
   try {
-    const taskId = await generateUniqueTaskId(title); // Generate task ID based on title
+    const taskId = await generateUniqueTaskId(title); // Generate unique task ID based on title
 
     const newTask = {
+      id: taskId,
       title,
       description,
       createdAt: Date.now(),
-      dueDate, // Convert dueDate to ISO format
+      dueDate: dueDate || null, // Optionally handle due date
       completed: false,
     };
 
-    const taskRef = db.ref(`tasks/${req.user.uid}/${taskId}`); // Save task using the unique ID
-    await taskRef.set(newTask);
+    // Fetch existing tasks or initialize an empty array
+    const userTasksRef = db.ref(`tasks/${req.user.uid}`);
+    const snapshot = await userTasksRef.once('value');
+    const existingTasks = snapshot.val() || [];
+
+    // Add the new task to the array
+    const updatedTasks = [...existingTasks, newTask];
+
+    // Save the updated task array back to the database
+    await userTasksRef.set(updatedTasks);
 
     res.status(201).json({ message: 'Task created successfully', taskId });
   } catch (error) {
     res.status(500).json({ message: 'Error creating task', error: error.message });
   }
 });
+
 
 
 // Update a task for authenticated user

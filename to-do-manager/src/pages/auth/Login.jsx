@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import axios
-import { BaseUrl, useUser } from '../../assets/UserContext';
+import { BaseUrl } from '../../assets/UserContext';
 import { Link } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode"; // Import jwt-decode correctly
 
@@ -9,7 +9,6 @@ const Login = ({ showToast }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { login } = useUser();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,10 +28,10 @@ const Login = ({ showToast }) => {
         console.log(claims);
 
         localStorage.setItem('user', JSON.stringify(claims));
+        localStorage.setItem('token', token); // Store the token if needed
 
-        login(res.data);
         showToast('success', 'Login successful!');
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (error) {
       if (error.response) {
@@ -90,7 +89,7 @@ const Login = ({ showToast }) => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link to="/auth/signup" className="text-blue-600 hover:text-blue-500 font-medium">
+          <Link to="/signup" className="text-blue-600 hover:text-blue-500 font-medium">
             Sign up
           </Link>
         </p>

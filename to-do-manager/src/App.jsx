@@ -1,16 +1,17 @@
-import { Routes, Route } from 'react-router-dom';
-import Login from '../../to-do-manager/src/pages/auth/Login';
-import Signup from '../../to-do-manager/src/pages/auth/Signup';
-import Home from '../../to-do-manager/src/pages/Home';
-import SingleTask from '../../to-do-manager/src/pages/SingleTask';
-import Auth from '../../to-do-manager/src/pages/auth/auth';
+import { Routes, Route, Navigate } from 'react-router-dom';
+
 import Navbar from './component/NavBar';
 import FooterSection from './component/FooterSection';
-import 'primereact/resources/themes/saga-blue/theme.css';  // Import theme
-import 'primereact/resources/primereact.min.css';          // Import core styles
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import Toast from './component/Toast';
 import { useState } from 'react';
+import DashBoard from './pages/DashBoard';
+import Auth from './pages/auth/Auth';
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
+import SingleTask from './pages/SingleTask';
 
 function App() {
 
@@ -34,12 +35,13 @@ function App() {
         />
       )}
       <Routes>
-        <Route path="/auth" element={<Auth />}>
+        <Route path="/" element={<Auth />}>
+          <Route index element={<Navigate to="login" />} />
           <Route path="login" element={<Login showToast={showToast} />} />
           <Route path="signup" element={<Signup />} />
         </Route>
-        <Route path="/" element={<Home />} />
-        <Route path="/singletask/:taskId" element={<SingleTask />} />
+        <Route path="/dashboard" element={<DashBoard />} />
+        <Route path="/task/:taskId" element={<SingleTask />} />
       </Routes>
       <FooterSection />
 

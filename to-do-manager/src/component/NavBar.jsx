@@ -1,23 +1,30 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useUser } from '../assets/UserContext';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
-  const { user, logout } = useUser(); // Access user and logout from context
   const [dropdownOpen, setDropdownOpen] = useState(false); // State to handle dropdown visibility
+  const [user, setUser] = useState(null); // State to store user data
+  const navigate = useNavigate(); // Navigate hook
+
+  // Fetch user data from localStorage
+
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen); // Toggle dropdown state
   };
 
   const handleLogout = () => {
-    logout(); // Call the logout function
+    // Remove user data and token from localStorage on logout
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null); // Clear the user state
     setDropdownOpen(false); // Close the dropdown after logout
+    navigate('/login'); // Redirect to login
   };
 
   return (
     <nav className="bg-white shadow-md p-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-semibold text-gray-800">
+      <Link to="/dashboard" className="text-xl font-semibold text-gray-800">
         To-Do
       </Link>
 
@@ -26,7 +33,7 @@ const Navbar = () => {
           <>
             {/* Show "Get Started" button if no user is logged in */}
             <Link
-              to="/auth/login"
+              to="/login"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               Get Started

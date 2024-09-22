@@ -38,7 +38,7 @@ const Signup = () => {
     });
 
     if (res.ok) {
-      navigate('/');
+      navigate('/dashboard');
     }
   };
 
@@ -126,7 +126,7 @@ const Signup = () => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
           Already have an account?{' '}
-          <Link to="/auth/login" className="text-blue-600 hover:text-blue-500 font-medium">
+          <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
             Log in
           </Link>
         </p>
