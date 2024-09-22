@@ -14,7 +14,7 @@ const CreateTask = () => {
     const token = localStorage.getItem("token");
     try {
     const res = await axios.post(`${Base_URL}/tasks`, {
-      title, description, date
+      title, description, dueDate:date
     }, { headers: { Authorization: `Bearer ${token}` } })
     if(res.status === 200){
       console.log("success");

@@ -1,13 +1,54 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { Table, Button, Container, Row, Col, Form } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import { AuthToken, Base_URL } from '../assets/Utilis';
+import SingleTaskModal from '../components/SingleTaskModal';
 
 const MyTaskListTable = ({ tasks, onEdit, onView, onDelete }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+//   const [searchTerm, setSearchTerm] = useState('');
+  const [filterTask, setFilterTask] = useState('');
+
+  const [showModal, setShowModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const handleEditClick = (task)=>{
+    setSelectedTask(task);
+    setShowModal(true);
+  }
+  const handleModalClose = ()=>{
+    setSelectedTask(null);
+    setShowModal(false);
+  }
+
+  useEffect(()=>{
+    const fetchTask = async () => {
+    try {
+      const res = await axios.get(`${Base_URL}/tasks`, { headers: { Authorization: `Bearer ${AuthToken}` } })
+      if (res.status === 200) {
+        const resData = res.data.tasks;
+        const formatTask = Object.keys(resData).map((id)=>({
+          id,
+          ...resData[id]
+        }))
+        setFilterTask(formatTask);
+        // setTask(formatTask[0]);
+      }
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data.message || "Request failed");
+      }
+      else {
+        toast.error("error");
+      }
+    }
+  }
+  fetchTask();
+  },[])
 
   // Filter tasks based on search input
-  const filteredTasks = tasks?.filter(task => 
-    task.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+//   const filteredTasks = tasks?.filter(task => 
+//     task.title.toLowerCase().includes(searchTerm.toLowerCase())
+//   );
 
   return (
     <Container className="mt-5">
@@ -16,14 +57,14 @@ const MyTaskListTable = ({ tasks, onEdit, onView, onDelete }) => {
           <h2 className="text-center mb-4">My Task List</h2>
 
           {/* Search Input */}
-          <Form.Control
+          {/* <Form.Control
             type="text"
             placeholder="Search by title..."
             className="mb-3"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-          />
-
+          /> */}
+    
           <Table striped bordered hover responsive>
             <thead>
               <tr>
@@ -35,13 +76,13 @@ const MyTaskListTable = ({ tasks, onEdit, onView, onDelete }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredTasks?.length > 0 ? (
-                filteredTasks.map((task, index) => (
+              {filterTask?.length > 0 ? (
+                filterTask.map((task, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{task.title}</td>
                     <td>{task.description}</td>
-                    <td>{new Date(task.date).toLocaleDateString()}</td>
+                    <td>{task.dueDate}</td>
                     <td>
                       <Button 
                         variant="primary" 
@@ -77,6 +118,7 @@ const MyTaskListTable = ({ tasks, onEdit, onView, onDelete }) => {
           </Table>
         </Col>
       </Row>
+      <SingleTaskModal show={showModal} hide= {handleModalClose} task={selectedTask} edit = {onEdit} delete ={onDelete}/>
     </Container>
   );
 };

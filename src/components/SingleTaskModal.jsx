@@ -55,9 +55,9 @@ const SingleTaskModal = ({ show, onHide, task, onEdit, onDelete }) => {
           </Form>
         ) : (
           <>
-            <h5>{task.title}</h5>
-            <p>{task.description}</p>
-            <p><strong>Due Date:</strong> {new Date(task.date).toLocaleDateString()}</p>
+            <h5>{task?.title}</h5>
+            <p>{task?.description}</p>
+            <p><strong>Due Date:</strong> {new Date(task?.date).toLocaleDateString()}</p>
           </>
         )}
       </Modal.Body>

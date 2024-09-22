@@ -3,7 +3,7 @@ import CreateTask from '../components/CreateTask'
 import NewTask from '../components/NewTask'
 import RecentlyAdded from '../components/RecentlyAdded'
 import { toast } from 'react-toastify'
-import { Base_URL } from '../assets/Utilis'
+import { AuthToken, Base_URL } from '../assets/Utilis'
 import axios from 'axios'
 
 function Dashboard(props) {
@@ -12,17 +12,23 @@ const[desc, setDesc] = useState();
 const[date, setDate] = useState();
 const[duedate, setDuedate] = useState();
 const[task, setTask] = useState();
-console.log("gs",task)
+const[tasks, setTasks] = useState();
   useEffect(() => {
-    const token = localStorage.getItem("token");
     const fetchTask = async () => {
       try {
-        const res = await axios.get(`${Base_URL}/tasks`, { headers: { Authorization: `Bearer ${token}` } })
+        const res = await axios.get(`${Base_URL}/tasks`, { headers: { Authorization: `Bearer ${AuthToken}` } })
         if (res.status === 200) {
-          console.log(res);
-          toast.success("Success");
-          const taskData = res.data.tasks;
-          setTask(taskData);
+          // console.log(res);
+          // toast.success("Success");
+          // const taskData = res.data.tasks;
+          // setTask(taskData);
+          const resData = res.data.tasks;
+          const formatTask = Object.keys(resData).map((id)=>({
+            id,
+            ...resData[id]
+          }))
+          setTasks(formatTask);
+          setTask(formatTask[0]);
         }
       } catch (error) {
         if (error.response) {
@@ -44,8 +50,8 @@ console.log("gs",task)
           <CreateTask />
         </div>
         <div className='col-md-6 bg-secondary'>
-          <NewTask />
-          <RecentlyAdded tasks = {task}/>
+          <NewTask task = {task}/>
+          <RecentlyAdded tasks = {tasks}/>
           {console.log(task)}
         </div>
       </div>
