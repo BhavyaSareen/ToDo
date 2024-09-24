@@ -245,28 +245,14 @@ app.post('/tasks', authenticate, async (req, res) => {
     return res.status(400).json({ message: 'Title and description are required.' });
   }
 
-  // Function to generate a unique task ID
-  const generateUniqueTaskId = async (baseTitle) => {
-    let taskId = baseTitle.replace(/\s+/g, '-'); // Replace spaces with hyphens
-    const snapshot = await db.ref(`tasks/${req.user.uid}`).once('value');
-
-    const existingTasks = snapshot.val() || [];
-    const taskExists = existingTasks.some(task => task.id === taskId);
-
-    // If task with the same ID exists, append a random 4-character string to ensure uniqueness
-    if (taskExists) {
-      const randomSuffix = Math.random().toString(36).substring(2, 6); // Generates a random 4-character string
-      taskId = `${taskId}-${randomSuffix}`;
-    }
-
-    return taskId;
-  };
-
   try {
-    const taskId = await generateUniqueTaskId(title); // Generate unique task ID based on title
+    const userTasksRef = db.ref(`tasks/${req.user.uid}`);
+
+    // Generate a new task reference with a unique ID using Firebase's push() method
+    const newTaskRef = userTasksRef.push();
 
     const newTask = {
-      id: taskId,
+      id: newTaskRef.key, // Firebase automatically generates a unique ID
       title,
       description,
       createdAt: Date.now(),
@@ -274,22 +260,15 @@ app.post('/tasks', authenticate, async (req, res) => {
       completed: false,
     };
 
-    // Fetch existing tasks or initialize an empty array
-    const userTasksRef = db.ref(`tasks/${req.user.uid}`);
-    const snapshot = await userTasksRef.once('value');
-    const existingTasks = snapshot.val() || [];
+    // Save the new task to the database
+    await newTaskRef.set(newTask);
 
-    // Add the new task to the array
-    const updatedTasks = [...existingTasks, newTask];
-
-    // Save the updated task array back to the database
-    await userTasksRef.set(updatedTasks);
-
-    res.status(201).json({ message: 'Task created successfully', taskId });
+    res.status(201).json({ message: 'Task created successfully', taskId: newTask.id });
   } catch (error) {
     res.status(500).json({ message: 'Error creating task', error: error.message });
   }
 });
+
 
 
 
@@ -344,23 +323,36 @@ app.get('/myprofile', authenticate, async (req, res) => {
 });
 
 // Update user profile (change name or password)
+// Update user profile (change name or password)
 app.patch('/myprofile', authenticate, async (req, res) => {
   const { name, password } = req.body;
 
+  if (!name && !password) {
+    return res.status(400).json({ message: 'At least one field (name or password) is required to update.' });
+  }
+
   try {
     const updates = {};
-    if (name) updates.name = name;
+
+    // Update name if provided
+    if (name) {
+      updates.name = name;
+    }
+
+    // Hash the new password if provided
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       updates.password = hashedPassword;
     }
 
+    // Apply the updates to the user profile
     await db.ref(`users/${req.user.uid}`).update(updates);
     res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error updating profile', error: error.message });
   }
 });
+
 
 
 // Forgot password API
