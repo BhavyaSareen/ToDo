@@ -7,38 +7,36 @@ import { AuthToken, Base_URL } from '../assets/Utilis'
 import axios from 'axios'
 
 function Dashboard(props) {
-const[title, setTitle] = useState();
-const[desc, setDesc] = useState();
-const[date, setDate] = useState();
-const[duedate, setDuedate] = useState();
-const[task, setTask] = useState();
-const[tasks, setTasks] = useState();
-  useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const res = await axios.get(`${Base_URL}/tasks`, { headers: { Authorization: `Bearer ${AuthToken}` } })
-        if (res.status === 200) {
-          // console.log(res);
-          // toast.success("Success");
-          // const taskData = res.data.tasks;
-          // setTask(taskData);
-          const resData = res.data.tasks;
-          const formatTask = Object.keys(resData).map((id)=>({
-            id,
-            ...resData[id]
-          }))
-          setTasks(formatTask);
-          setTask(formatTask[0]);
-        }
-      } catch (error) {
-        if (error.response) {
-          toast.error(error.response.data.message || "Request failed");
-        }
-        else {
-          toast.error("error");
-        }
+  const [title, setTitle] = useState();
+  const [desc, setDesc] = useState();
+  const [date, setDate] = useState();
+  const [duedate, setDuedate] = useState();
+  const [task, setTask] = useState();
+  const [tasks, setTasks] = useState();
+
+  const fetchTask = async () => {
+    try {
+      const res = await axios.get(`${Base_URL}/tasks`, { headers: { Authorization: `Bearer ${AuthToken()}` } })
+      if (res.status === 200) {
+        const resData = res.data.tasks;
+        const formatTask = Object.keys(resData).map((id) => ({
+          id,
+          ...resData[id]
+        }))
+        setTasks(formatTask);
+        setTask(formatTask[0]);
+      }
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data.message || "Request failed");
+      }
+      else {
+        toast.error("error");
       }
     }
+  }
+
+  useEffect(() => {
     fetchTask();
   }, [])
 
@@ -47,15 +45,14 @@ const[tasks, setTasks] = useState();
     <div className='container-fluid'>
       <div className='row vh-100'>
         <div className='col-md-6'>
-          <CreateTask />
+          <CreateTask onTaskCreated={fetchTask} />
         </div>
         <div className='col-md-6 bg-secondary'>
-          <NewTask task = {task}/>
-          <RecentlyAdded tasks = {tasks}/>
+          <NewTask task={task} />
+          <RecentlyAdded tasks={tasks} />
           {console.log(task)}
         </div>
       </div>
-
     </div>
   )
 }

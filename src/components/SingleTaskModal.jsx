@@ -1,92 +1,60 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-const SingleTaskModal = ({ show, onHide, task, onEdit, onDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState({ ...task });
+const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, setTitle, setDescription, setDueDate }) => {
+    
+    const changeTitile = (e)=>{
+        console.log(e.target.value)
+    }
 
-  // Handle form input change when editing
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditedTask({ ...editedTask, [name]: value });
-  };
+    const changeDesc = ()=>{}
 
-  // Save edited task
-  const handleSave = () => {
-    onEdit(editedTask);
-    setIsEditing(false);
-  };
+    const changeDate = ()=>{}
 
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>{isEditing ? 'Edit Task' : 'Task Details'}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {isEditing ? (
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Title</Form.Label>
-              <Form.Control
-                type="text"
-                name="title"
-                value={editedTask.title}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="description"
-                value={editedTask.description}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Due Date</Form.Label>
-              <Form.Control
-                type="date"
-                name="date"
-                value={editedTask.date}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-          </Form>
-        ) : (
-          <>
-            <h5>{task?.title}</h5>
-            <p>{task?.description}</p>
-            <p><strong>Due Date:</strong> {new Date(task?.date).toLocaleDateString()}</p>
-          </>
-        )}
-      </Modal.Body>
-      <Modal.Footer>
-        {isEditing ? (
-          <>
-            <Button variant="secondary" onClick={() => setIsEditing(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={handleSave}>
-              Save
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button variant="warning" onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
-            <Button variant="danger" onClick={() => onDelete(task)}>
-              Delete
-            </Button>
-          </>
-        )}
-        <Button variant="secondary" onClick={onHide}>
-          Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
+    useEffect(() => {
+        // if (task) {
+        //     setTitle(task.title)
+        //     setDescription(task.description)
+        //     setDueDate(task.dueDate)
+        // }
+    }, [])
+    return (
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>{isEdit ? "Editing" : "Task Details"}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {isEdit ? (<Form>
+                    <Form.Group>
+                        <Form.Label>Title</Form.Label>
+                        <Form.Control type = "text" onChange={changeTitile}/>
+                        <Form.Label>Description</Form.Label>
+                        <Form.Control type = "text" onChange={changeDesc}/>
+                        <Form.Label>Due Date</Form.Label>
+                        <Form.Control type = "text" onChange={changeDate}/>
+                    </Form.Group>
+                </Form>) :
+                    (<><h5>Title</h5>
+                        <p>{task ? task.title : 'Task Details'}</p>
+                        <h5>Description</h5>
+                        <p>{task ? task.description : 'No description available.'}</p>
+                        <h5>Date</h5>
+                        <p>{task ? task.dueDate : 'No date available.'}</p></>)}
+
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Close
+                </Button>
+                <Button variant="primary" onClick={() => setIsEdit(true)}>
+                    Edit
+                </Button>
+                <Button variant="danger">
+                    Delete
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
 };
 
 export default SingleTaskModal;

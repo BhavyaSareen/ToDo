@@ -42,8 +42,6 @@ const NavBar = () => {
               <NavDropdown.Item onClick={handleLogOut}>Log Out</NavDropdown.Item>
             </NavDropdown>
           </>)}
-
-
         </Navbar.Collapse>
       </Container>
     </Navbar>

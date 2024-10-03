@@ -8,6 +8,8 @@ const NewTask = ({ task }) => {
         <Col md={6}>
           <Card>
             <Card.Body>
+            <h5>Last Added Task</h5>
+            <hr />
               <Card.Title>{task?.title}</Card.Title>
               <Card.Text>
                 <strong>Description:</strong> {task?.description}

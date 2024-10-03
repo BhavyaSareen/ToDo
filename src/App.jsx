@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css'
 import Footer from './components/Footer'
 import NavBar from './components/NavBar'
@@ -9,8 +9,7 @@ import Dashboard from './Pages/Dashboard';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRoutes from './assets/ProtectedRoutes';
-import MyTaskListTable from './Pages/MyTaskListTable';
-
+import TaskListTable from './Pages/MyTaskListTable';
 function App() {
   const name = ()=>{
     localStorage.setItem("hi","hlo");
@@ -27,8 +26,8 @@ function App() {
         <Route path='/dashboard' element={
           <ProtectedRoutes><Dashboard name = {name} /></ProtectedRoutes>
           }></Route>
-          <Route path='/tasklist' element={<MyTaskListTable/>}></Route>
-      </Routes>
+             <Route path='/tasklist' element={<TaskListTable/>}></Route>
+   </Routes>
       <ToastContainer
         position="top-right"
         autoClose={5000}
