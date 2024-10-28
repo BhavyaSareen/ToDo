@@ -1,21 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, setTitle, setDescription, setDueDate }) => {
-    
-    const changeTitile = (e)=>{
-        console.log(e.target.value)
+const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, title, setTitle, description,setDescription, dueDate, setDueDate, onEdit}) => {
+    // const [title, updateTitle] = useState(title);
+    // const [desc, updateDesc] = useState(description);
+    // const [dueDate, updateDueDate] = useState(dueDate);
+
+    const changeTitile = (e) => {
+        // console.log(e.target.value);
+        setTitle(e.target.value);
     }
 
-    const changeDesc = ()=>{}
+    const changeDesc = (e) => {
+        setDescription(e.target.value);
+     }
 
-    const changeDate = ()=>{}
+    const changeDate = (e) => {
+        setDueDate(e.target.value);
+     }
 
     useEffect(() => {
         // if (task) {
-        //     setTitle(task.title)
-        //     setDescription(task.description)
-        //     setDueDate(task.dueDate)
+        //     setTitle(task.title);
+        //     setDescription(task.description);
+        //     setDueDate(task.dueDate);
         // }
     }, [])
     return (
@@ -27,11 +35,11 @@ const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, setTitle,
                 {isEdit ? (<Form>
                     <Form.Group>
                         <Form.Label>Title</Form.Label>
-                        <Form.Control type = "text" onChange={changeTitile}/>
+                        <Form.Control type="text" value={title} onChange={changeTitile} />
                         <Form.Label>Description</Form.Label>
-                        <Form.Control type = "text" onChange={changeDesc}/>
+                        <Form.Control type="text" value={description} onChange={changeDesc} />
                         <Form.Label>Due Date</Form.Label>
-                        <Form.Control type = "text" onChange={changeDate}/>
+                        <Form.Control type="text" value={dueDate} onChange={changeDate} />
                     </Form.Group>
                 </Form>) :
                     (<><h5>Title</h5>
@@ -43,15 +51,18 @@ const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, setTitle,
 
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Close
-                </Button>
-                <Button variant="primary" onClick={() => setIsEdit(true)}>
-                    Edit
-                </Button>
-                <Button variant="danger">
-                    Delete
-                </Button>
+                
+                {isEdit? 
+                <>
+                <Button variant="danger" onClick={handleClose}> Discard Changes </Button>
+                <Button variant='success' onClick={onEdit}>Save changes</Button>
+                </>
+                :
+                <>
+                <Button variant="secondary" onClick={handleClose}> Close </Button>
+                <Button variant="primary" onClick={() => setIsEdit(true)}> Edit </Button>
+                </>
+                }
             </Modal.Footer>
         </Modal>
     );

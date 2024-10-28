@@ -10,12 +10,12 @@ import SingleTaskModal from '../components/SingleTaskModal';
 
 const TaskListTable = () => {
     const [search, setSearch] = useState('');
-    const [task, setTask] = useState();
+    const [task, setTask] = useState([]);
     const [show, setShow] = useState(false);
-    const [modalTask, setModalTask] = useState();
-    const [title, setTitle] = useState();
-    const [desc, setDesc] = useState();
-    const [date, setDate] = useState();
+    const [modalTask, setModalTask] = useState(null);
+    const [title, setTitle] = useState("");
+    const [desc, setDesc] = useState("");
+    const [date, setDate] = useState("");
     const [isEdit, setIsEdit] = useState(false);
 
 
@@ -53,11 +53,13 @@ const TaskListTable = () => {
     }
     const onEdit = async () => {
         try {
-            const res = await axios.patch(`${Base_URL}/tasks/${task.id}`, { headers: { Authorization: `Bearer ${AuthToken()}` } }, {
-                title, desc, date
-            })
+            const res = await axios.patch(`${Base_URL}/tasks/${modalTask.id}`, {
+                title, description: desc, date
+            }, { headers: { Authorization: `Bearer ${AuthToken()}` }})
             if (res.status === 200) {
-                toast.success("Edited successfully")
+                toast.success("Edited successfully");
+                closeModal();
+                fetchTask();
             }
         } catch (error) {
             if (error.response) {
@@ -70,12 +72,15 @@ const TaskListTable = () => {
     }
 
     const handleShow = (task) => {
-        setShow(true);
-        setModalTask(task);
+        setShow(true);//prop
+        setModalTask(task);//prop
+        setTitle(task.title);
+        setDesc(task.description);
+        setDate(task.dueDate)
     }
     const closeModal = () => {
         setShow(false);
-        setIsEdit(false)
+        setIsEdit(false);
     }
 
     useEffect(() => {
@@ -120,8 +125,8 @@ const TaskListTable = () => {
                                 <td className='d-flex justify-content-end'>
                                     <Button variant="primary" as={Link} onClick={() => { handleShow(task) }}
                                         className="me-2"> View </Button>
-                                    <Button variant="warning" as={Link} onClick={() => onEdit()}
-                                        className="me-2" > Edit </Button>
+                                    {/* <Button variant="warning" as={Link} onClick={() => onEdit()}
+                                        className="me-2" > Edit </Button> */}
                                     <Button variant="danger" onClick={() => onDelete(task)} >
                                         Delete </Button>
                                 </td>
@@ -134,7 +139,9 @@ const TaskListTable = () => {
                     )}
                 </tbody>
             </Table>
-            <SingleTaskModal show={show} handleClose={closeModal} task={modalTask} isEdit = {isEdit} setIsEdit = {setIsEdit} setTitle={setTitle} setDescription={setDesc} setDueDate={setDate} />
+            <SingleTaskModal show={show} handleClose={closeModal} task={modalTask} isEdit={isEdit} 
+            setIsEdit={setIsEdit} title={title} setTitle={setTitle} description={desc} 
+            setDescription={setDesc} dueDate={date} setDueDate={setDate} onEdit= {onEdit} />
         </div>
     );
 };

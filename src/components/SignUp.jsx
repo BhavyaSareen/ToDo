@@ -5,7 +5,7 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Base_URL } from '../assets/Utilis';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const SignUp = () => {
@@ -88,6 +88,7 @@ const SignUp = () => {
             <Button variant="primary" type="submit" className="w-100">
               Sign Up
             </Button>
+            <Link to="/login" className='text-center'>Aleady exist? Login</Link>
           </Form>
         </Col>
       </Row>

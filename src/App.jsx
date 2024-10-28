@@ -10,9 +10,10 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRoutes from './assets/ProtectedRoutes';
 import TaskListTable from './Pages/MyTaskListTable';
+import PublicRoute from './assets/PublicRoute';
 function App() {
-  const name = ()=>{
-    localStorage.setItem("hi","hlo");
+  const name = () => {
+    localStorage.setItem("hi", "hlo");
   };
   return (
     <>
@@ -20,14 +21,17 @@ function App() {
 
       <Routes>
         <Route path='/' element={<Home />}>
-          <Route path='login' element={<Login />} />
-          <Route path='signup' element={<SignUp />} />
+          <Route path='login' element={
+            <PublicRoute><Login /></PublicRoute>} />
+          <Route path='signup' element={
+            <PublicRoute><SignUp /></PublicRoute>} />
         </Route>
         <Route path='/dashboard' element={
-          <ProtectedRoutes><Dashboard name = {name} /></ProtectedRoutes>
-          }></Route>
-             <Route path='/tasklist' element={<TaskListTable/>}></Route>
-   </Routes>
+          <ProtectedRoutes><Dashboard name={name} /></ProtectedRoutes>
+        }></Route>
+        <Route path='/tasklist' element={
+          <ProtectedRoutes><TaskListTable /></ProtectedRoutes>}></Route>
+      </Routes>
       <ToastContainer
         position="top-right"
         autoClose={5000}

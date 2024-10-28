@@ -1,0 +1,40 @@
+/* Main container for the Dashboard */
+.dashboard-container {
+    background-color: #f8f9fa; /* Light background color for the entire dashboard */
+    font-family: Arial, sans-serif; /* Sets font family */
+  }
+  
+  /* Left section styling for creating tasks */
+  .create-task-section {
+    background-color: #fff; /* White background for contrast */
+    border-right: 1px solid #ddd; /* Border to separate sections */
+  }
+  
+  /* Right section styling for task display */
+  .task-view-section {
+    background-color: #f1f3f5; /* Light gray background */
+  }
+  
+  /* Styling for section titles */
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #343a40; /* Darker text color */
+    margin-bottom: 1rem;
+  }
+  
+  /* Adds vertical scrolling to each section */
+  .create-task-section,
+  .task-view-section {
+    overflow-y: auto;
+  }
+  
+  /* Responsive adjustments for mobile screens */
+  @media (max-width: 768px) {
+    .create-task-section,
+    .task-view-section {
+      border-right: none; /* Removes border for a cleaner look on mobile */
+      padding: 2rem 1rem; /* Adds padding */
+    }
+  }
+  

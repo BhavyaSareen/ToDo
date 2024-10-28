@@ -5,8 +5,9 @@ import React, { useContext, useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Base_URL } from '../assets/Utilis';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import SignUp from './SignUp';
 // import { AuthContext } from '../assets/AuthContext';
 
 const Login = () => {
@@ -49,7 +50,7 @@ const Login = () => {
   return (
     <Container className="mt-5">
       <Row className="justify-content-md-center">
-        <Col md={6}>
+        <Col md={6} style={{ "box-shadow": "2px 2px 20px", "padding": "20px"}}>
           <h2 className="text-center mb-4">Login</h2>
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="formEmail" className="mb-3">
@@ -76,6 +77,8 @@ const Login = () => {
             <Button variant="primary" type="submit" className="w-100">
               Login
             </Button>
+            
+            <Link to="/signup">Register if you are not login</Link>
           </Form>
         </Col>
       </Row>
