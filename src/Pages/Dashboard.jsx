@@ -49,21 +49,21 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container container-fluid">
-      <div className="row vh-100">
+      <div className="row">
         {/* Left section for creating a new task */}
         <div className="col-md-6 p-4 create-task-section">
-          <h3 className="section-title">Create New Task</h3>
+          <h3 className="section-title text-center">Create New Task</h3>
           {/* Component to create a new task, refetches tasks after a new one is created */}
           <CreateTask onTaskCreated={fetchTask} />
         </div>
 
         {/* Right section for displaying tasks */}
         <div className="col-md-6 p-4 task-view-section">
-          <h3 className="section-title">Current Task</h3>
+          <h3 className="section-title text-center">Current Task</h3>
           {/* Component to display the selected task */}
           <NewTask task={task} />
           
-          <h3 className="section-title mt-4">Recently Added Tasks</h3>
+          <h3 className="section-title mt-4 text-center">Recently Added Tasks</h3>
           {/* Component to display the list of recently added tasks */}
           <RecentlyAdded tasks={tasks} />
           {/* Console log for debugging purposes */}

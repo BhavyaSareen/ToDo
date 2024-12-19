@@ -6,7 +6,7 @@ function Home() {
     
     return (
         <div className='container-fluid '>
-            <div className='row vh-100'>
+            <div className='row align-items-center'>
                 <div className='col-6'>
                     <img src="/todo-img.png" alt="todo-img" className='img-fluid w-100' />
                 </div>

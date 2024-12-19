@@ -16,12 +16,11 @@ const SignUp = () => {
     const[success, setSuccess] = useState(false);
     const navigate = useNavigate();
 
-
     const handleSignUp = async(e)=>{
         e.preventDefault();
         // console.log(name)
         // console.log(email)
-        // console.log(password)
+
         try {
           const res = await axios.post(`${Base_URL}/signup`,{
             name, email, password,
@@ -33,7 +32,8 @@ const SignUp = () => {
             const decodedToken = jwtDecode(token);
             // console.log(decodedToken);
             localStorage.setItem("user",JSON.stringify(decodedToken.claims));
-            localStorage.setItem("token",JSON.stringify(token));
+            localStorage.setItem("token",token);
+            localStorage.setItem("login", "true");
             toast.success("Login Successfully")
             navigate('/dashboard')
           }

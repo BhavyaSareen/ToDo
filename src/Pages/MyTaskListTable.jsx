@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { AuthToken, Base_URL } from '../assets/Utilis';
 import { toast } from 'react-toastify';
 import SingleTaskModal from '../components/SingleTaskModal';
+import { TiTick } from 'react-icons/ti';
 
 const TaskListTable = () => {
     const [search, setSearch] = useState('');
@@ -111,7 +112,8 @@ const TaskListTable = () => {
                         <th>Title</th>
                         <th>Description</th>
                         <th>Date</th>
-                        <th className='d-flex justify-content-end'>Actions</th>
+                        <th className=''>Actions</th>
+                        <th className=''>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -122,13 +124,18 @@ const TaskListTable = () => {
                                 <td>{task.title}</td>
                                 <td>{task.description}</td>
                                 <td>{task.dueDate}</td>
-                                <td className='d-flex justify-content-end'>
+                                <td className=''>
                                     <Button variant="primary" as={Link} onClick={() => { handleShow(task) }}
                                         className="me-2"> View </Button>
                                     {/* <Button variant="warning" as={Link} onClick={() => onEdit()}
                                         className="me-2" > Edit </Button> */}
                                     <Button variant="danger" onClick={() => onDelete(task)} >
                                         Delete </Button>
+                                </td>
+                                <td>
+                                {/* <Button className="me-2" variant="secondary"> Pending </Button>
+                                <Button variant="success"> Completed </Button> */}
+                                <TiTick />
                                 </td>
                             </tr>
                         ))

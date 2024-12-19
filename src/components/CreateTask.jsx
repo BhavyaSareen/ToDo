@@ -31,7 +31,7 @@ const CreateTask = ({ onTaskCreated }) => {
 
   return (
     <Card>
-      <Container className="mt-5">
+      <Container className="mt-5 mb-5">
         <Row className="justify-content-md-center">
           <Col md={6}>
             <h2 className="text-center mb-4">Create New Task</h2>

@@ -21,8 +21,11 @@ const NavBar = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/dashboard">Home</Nav.Link>
-            <Nav.Link as={Link} to="/tasklist">Task list</Nav.Link>
+            {isLogin && (<>
+              <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+              <Nav.Link as={Link} to="/tasklist">Task list</Nav.Link>
+            </>)}
+
             {/* Add more links here if needed */}
           </Nav>
           {!isLogin ? (<>
@@ -44,7 +47,7 @@ const NavBar = () => {
           </>)}
         </Navbar.Collapse>
       </Container>
-    </Navbar>
+    </Navbar >
   );
 };
 
