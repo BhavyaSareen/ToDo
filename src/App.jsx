@@ -11,23 +11,21 @@ import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRoutes from './assets/ProtectedRoutes';
 import TaskListTable from './Pages/MyTaskListTable';
 import PublicRoute from './assets/PublicRoute';
+import HomeContent from './components/HomeContent';
 function App() {
-  const name = () => {
-    localStorage.setItem("hi", "hlo");
-  };
+
   return (
     <>
       <NavBar />
 
       <Routes>
-        <Route path='/' element={<Home />}>
-          <Route path='login' element={
-            <PublicRoute><Login /></PublicRoute>} />
-          <Route path='signup' element={
-            <PublicRoute><SignUp /></PublicRoute>} />
+        <Route path='/' element={<PublicRoute><Home /></PublicRoute>}>
+          <Route index element={<PublicRoute><HomeContent /></PublicRoute>} />
+          <Route path='login' element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path='signup' element={<PublicRoute><SignUp /></PublicRoute>} />
         </Route>
         <Route path='/dashboard' element={
-          <ProtectedRoutes><Dashboard name={name} /></ProtectedRoutes>
+          <ProtectedRoutes><Dashboard /></ProtectedRoutes>
         }></Route>
         <Route path='/tasklist' element={
           <ProtectedRoutes><TaskListTable /></ProtectedRoutes>}></Route>
@@ -45,7 +43,6 @@ function App() {
         theme="light"
       />
       {/* Same as */}
-      <ToastContainer />
       <Footer />
 
     </>

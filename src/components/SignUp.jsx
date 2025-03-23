@@ -9,47 +9,45 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const SignUp = () => {
-  const[name, setName] = useState("");
-    const[email, setEmail] = useState("");
-    const[password, setPassword] = useState("");
-    const[error, setError] = useState("");
-    const[success, setSuccess] = useState(false);
-    const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-    const handleSignUp = async(e)=>{
-        e.preventDefault();
-        // console.log(name)
-        // console.log(email)
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    // console.log(name)
+    // console.log(email)
 
-        try {
-          const res = await axios.post(`${Base_URL}/signup`,{
-            name, email, password,
-          });
-          if(res.status === 200){
-            // console.log("Successful");
-            const token = res.data.token;
-            // console.log(token);
-            const decodedToken = jwtDecode(token);
-            // console.log(decodedToken);
-            localStorage.setItem("user",JSON.stringify(decodedToken.claims));
-            localStorage.setItem("token",token);
-            localStorage.setItem("login", "true");
-            toast.success("Login Successfully")
-            navigate('/dashboard')
-          }
-        } catch (error) {
-          if (error.response) {
-            toast.error(error.response.data.message || "Request failed");
-          }
-          else{
-            toast.error("Error")
-          }
-        }
+    try {
+      const res = await axios.post(`${Base_URL}/signup`, {
+        name, email, password,
+      });
+      if (res.status === 200) {
+        // console.log("Successful");
+        const token = res.data.token;
+        // console.log(token);
+        const decodedToken = jwtDecode(token);
+        console.log(decodedToken);
+        localStorage.setItem("user", JSON.stringify(decodedToken.uid));
+        localStorage.setItem("token", token);
+        localStorage.setItem("login", "true");
+        toast.success("Login Successfully")
+        navigate('/dashboard')
+      }
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data.message || "Request failed");
+      }
+      else {
+        toast.error("Error")
+      }
     }
+  }
   return (
     <Container className="mt-5">
       <Row className="justify-content-md-center">
-        <Col md={6}>
+        <Col md={6} style={{ "box-shadow": "2px 2px 20px", "padding": "20px" }}>
           <h2 className="text-center mb-4">Sign Up</h2>
           <Form onSubmit={handleSignUp}>
             <Form.Group controlId="formName" className="mb-3">
@@ -59,7 +57,7 @@ const SignUp = () => {
                 name="name"
                 placeholder="Enter your name"
                 value={name}
-                onChange={(e)=>setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
               />
             </Form.Group>
 
@@ -70,7 +68,7 @@ const SignUp = () => {
                 name="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e)=> setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Group>
 
@@ -81,7 +79,7 @@ const SignUp = () => {
                 name="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e)=>setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </Form.Group>
 

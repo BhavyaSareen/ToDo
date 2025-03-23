@@ -10,7 +10,7 @@ const PublicRoute = ({ children }) => {
             navigate("/dashboard");
         }
     }, [token, navigate])
-    return token ? null : children;
+    return !token && children;
 }
 
 export default PublicRoute

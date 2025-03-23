@@ -17,7 +17,7 @@ const RecentlyAdded = ({ tasks }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tasks?.slice(0,4).map(task => (
+                  {tasks?.slice(1,4).map(task => (
                     <tr key={task.id}>
                       <td>{task.title}</td>
                       <td>{task.dueDate}</td>

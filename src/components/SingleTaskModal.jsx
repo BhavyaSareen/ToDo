@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, title, setTitle, description,setDescription, dueDate, setDueDate, onEdit}) => {
+const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, title, setTitle, description, setDescription, dueDate, setDueDate, onEdit }) => {
     // const [title, updateTitle] = useState(title);
     // const [desc, updateDesc] = useState(description);
     // const [dueDate, updateDueDate] = useState(dueDate);
@@ -13,11 +13,11 @@ const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, title, se
 
     const changeDesc = (e) => {
         setDescription(e.target.value);
-     }
+    }
 
     const changeDate = (e) => {
         setDueDate(e.target.value);
-     }
+    }
 
     useEffect(() => {
         // if (task) {
@@ -51,17 +51,17 @@ const SingleTaskModal = ({ show, handleClose, task, isEdit, setIsEdit, title, se
 
             </Modal.Body>
             <Modal.Footer>
-                
-                {isEdit? 
-                <>
-                <Button variant="danger" onClick={handleClose}> Discard Changes </Button>
-                <Button variant='success' onClick={onEdit}>Save changes</Button>
-                </>
-                :
-                <>
-                <Button variant="secondary" onClick={handleClose}> Close </Button>
-                <Button variant="primary" onClick={() => setIsEdit(true)}> Edit </Button>
-                </>
+
+                {isEdit ?
+                    <>
+                        <Button variant="danger" onClick={handleClose}> Discard Changes </Button>
+                        <Button variant='success' onClick={onEdit}>Save changes</Button>
+                    </>
+                    :
+                    <>
+                        <Button variant="secondary" onClick={handleClose}> Close </Button>
+                        <Button variant="primary" onClick={() => setIsEdit(true)}> Edit </Button>
+                    </>
                 }
             </Modal.Footer>
         </Modal>
