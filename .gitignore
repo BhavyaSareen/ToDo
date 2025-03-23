@@ -27,3 +27,4 @@ backend/package-lock.json
 to-do-manager/src/assets/UserContext.jsx
 to-do-manager/package-lock.json
 backend/env
+.env
